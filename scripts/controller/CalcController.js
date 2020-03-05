@@ -20,7 +20,37 @@ class CalcController{
         this.initKeyboard();
     }
 
-    /*Tudo que acontece quando inicia a calculadora*/
+    pasteFromClipboard(){
+
+        document.addEventListener('paste', e =>{
+            //guarda em text o valor copiado
+            let text = e.clipboardData.getData('text');
+            //transforma em número
+            text = parseFloat(text);
+            //coloca esse número no display
+            this.displayCalc = text;
+            //coloca o número no array para que possa fazer operações com ele
+            this.pushOperation(text);
+        })
+
+    }
+
+    copyToClipboard(){
+        //cria um input
+        let input = document.createElement('input');
+        //define seu valor como o do display
+        input.value = this.displayCalc;
+        //faz ele aparecer na tela para poder ser selecionado
+        document.body.appendChild(input);
+        //seleciona o input
+        input.select();
+        //copia seu valor (por base do evento de teclado ctrl+c)
+        document.execCommand("Copy");
+        //remove o input da tela
+        input.remove();
+    }
+
+    /*Tudo que precisa ser iniciado junto da calculadora*/
     initialize(){
         //Responsavel pela data e hora
         this.setDisplayDateTime();
@@ -29,6 +59,8 @@ class CalcController{
         }, 1000);
         //Para o display começar exibindo o 0
         this.setLastNumberToDisplay();
+        //Para ficar ouvindo um possivel ctrl+v
+        this.pasteFromClipboard();
     }
 
     initKeyboard(){
@@ -68,7 +100,11 @@ class CalcController{
                 case '8':
                 case '9':
                     this.addOperation(parseInt(e.key));
-                    break;               
+                    break;
+                    
+                case 'c':
+                    if (e.ctrlKey) this.copyToClipboard();
+                    break;
             }
         });
     }
