@@ -17,6 +17,7 @@ class CalcController{
         this._currentDate;
         this.initialize();
         this.initButtonsEvents();
+        this.initKeyboard();
     }
 
     /*Tudo que acontece quando inicia a calculadora*/
@@ -28,6 +29,48 @@ class CalcController{
         }, 1000);
         //Para o display começar exibindo o 0
         this.setLastNumberToDisplay();
+    }
+
+    initKeyboard(){
+        document.addEventListener('keyup', e=>{
+            switch (e.key) {
+
+                case 'Escape':
+                    this.clearAll();
+                    break;
+                case 'Backspace':
+                    this.clearEntry();
+                    break;
+                case '+':
+                case '-':
+                case '/':
+                case '*':
+                case '%':
+                    this.addOperation(e.key);
+                    break;
+                case 'Enter':
+                case '=':
+                    this.calc();
+                    break;
+                case '.':
+                case ',':
+                    this.addDot('.');
+                    break;
+    
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    this.addOperation(parseInt(e.key));
+                    break;               
+            }
+        });
     }
 
     /*Fasemos isso para facilitar a adição de multiplos eventos*/
@@ -71,15 +114,17 @@ class CalcController{
     }
 
     pushOperation(value){
+        //coloca o value recebido no array
         this._operation.push(value);
-
+        //para que sempre que passar de 3 itens digitados (3 + 2, por exemplo), chamar a função de calcular
         if (this._operation.length > 3){
-
             this.calc();
         }
     }
 
     getResult(){
+        //transforma o array operation em string sem espaços por usar join ao inves de toString e
+        //calcula seu valor por meio do aval
         return eval(this._operation.join(""));
     }
 
@@ -88,7 +133,8 @@ class CalcController{
         let last = '';
 
         this._lastOperator = this.getLastItem();
-
+        
+        //para que o operador não seja perdido nas repetições ao apertar = mais de uma vez
         if (this._operation.length < 3){
             let firstItem = this._operation[0];
             this._operation = [firstItem, this._lastOperator, this._lastNumber];
@@ -144,6 +190,7 @@ class CalcController{
             }
         }
 
+        //Mantem o ultimo operador ou numero que está na memória caso não encontre nenhum
         if (!lastItem){
             lastItem = (isOperator) ? this._lastOperator : this._lastNumber;
         }
@@ -209,7 +256,7 @@ class CalcController{
 
         let lastOperation = this.getLastOperation();
 
-        /*Impedindo que sejam digitados mais que 1 ponto */
+        /*Impede que sejam digitados mais que 1 ponto */
             //verifica se o lastOperation é uma string e da um split nela(separa os elementos em array)
             //da um indexOf pra ver se há um ponto nesse array. Caso haja, vai retornar algo igual ou maior a 0
             //porém, nesse caso verificamos se não há, por isso esperamos que retorne -1
@@ -217,9 +264,11 @@ class CalcController{
             //pois já existe um
         if (typeof lastOperation === 'string' && lastOperation.split('').indexOf('.') > -1) return;
 
-
+        /*Faz o . funcionar sem problemas*/
+        //caso digite o . sem ter digitado nenhum número antes
         if (this.isOperator(lastOperation) || !lastOperation){
             this.pushOperation('0.');
+        //caso já tenha digitado um número, o transforma em string para adicionar o .
         }else{
             this.setLastOperation(lastOperation.toString() + '.');
         }
@@ -260,7 +309,6 @@ class CalcController{
                 break;
 
             case '0':
-                console.log(this._operation);
             case '1':
             case '2':
             case '3':
