@@ -5,6 +5,8 @@ class CalcController{
         //this._ significa que o atributo é privado
         
         //Pega os elementos do html e coloca nas variaveis
+        this._audioOnOff = false;
+        this._audio = new Audio('click.mp3');
         this._lastOperator = '';
         this._lastNumber = '';
 
@@ -21,7 +23,7 @@ class CalcController{
     }
 
     pasteFromClipboard(){
-
+        //capitura o evento de teclado ctrl+v
         document.addEventListener('paste', e =>{
             //guarda em text o valor copiado
             let text = e.clipboardData.getData('text');
@@ -61,10 +63,34 @@ class CalcController{
         this.setLastNumberToDisplay();
         //Para ficar ouvindo um possivel ctrl+v
         this.pasteFromClipboard();
+
+        //duplo click para ativar e desativar o som
+        document.querySelectorAll('.btn-ac').forEach(btn=>{
+            btn.addEventListener('dblclick', e=>{
+                this.toggleAudio();
+            });
+        });
+    }
+
+    toggleAudio(){
+        /*Interruptor do audio - caso ligado desliga, caso desligado liga*/
+        //ele é igual ao contrario dele mesmo
+        this._audioOnOff = !this._audioOnOff;
+    }
+
+    playAudio(){
+        //executa o audio caso esteja ligado
+        if (this._audioOnOff){
+            this._audio.currentTime = 0;
+            this._audio.play();
+        }
     }
 
     initKeyboard(){
         document.addEventListener('keyup', e=>{
+            
+            this.playAudio();
+
             switch (e.key) {
 
                 case 'Escape':
@@ -314,6 +340,8 @@ class CalcController{
     }
 
     execBtn(value){
+        this.playAudio();
+
         switch (value) {
 
             case 'ac':
