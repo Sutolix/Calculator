@@ -5,6 +5,10 @@ class CalcController{
         //this._ significa que o atributo é privado
         
         //Pega os elementos do html e coloca nas variaveis
+        this._lastOperator = '';
+        this._lastNumber = '';
+
+        
         this._locale = 'en-us';
         this._operation = [];
         this._displayCalcEl = document.querySelector("#display");
@@ -43,6 +47,8 @@ class CalcController{
     clearAll(){
         //apaga tudo
         this._operation = [];
+        this._lastNumber = '';
+        this._lastOperator = '';
         //atualiza o display
         this.setLastNumberToDisplay();
     }
@@ -73,44 +79,80 @@ class CalcController{
         }
     }
 
+    getResult(){
+        return eval(this._operation.join(""));
+    }
+
     calc(){
-        //pega o ultimo operador digitado
-        let last = this._operation.pop();
+        //operador
+        let last = '';
+
+        this._lastOperator = this.getLastItem();
+
+        if (this._operation.length < 3){
+            let firstItem = this._operation[0];
+            this._operation = [firstItem, this._lastOperator, this._lastNumber];
+        }
+
+        //para sempre fazer as operações aos pares. (2 + 2 => 3 digitos)
+        //ele soma os dois e só depois aceita novas operações
+        if (this._operation.length > 3){
+            //pega o ultimo operador digitado
+            last = this._operation.pop();
+            this._lastNumber = this.getResult();
+
+        //else if para não sobreescrever a variavel. Se cair em um não cai no outro
+        }else if (this._operation.length == 3){
+            this._lastNumber = this.getLastItem(false);
+        }
 
         //.join("") faz o mesmo que o .toString mas sem adicionar , entre os elementos
-        //eval fará a soma dos valores na string
-        let result = eval(this._operation.join(""));
+        //eval fará a operação dos valores na string (criada pelo join)
+        let result = this.getResult();
 
+        //para porcentagem
         if (last == '%'){
-
+            //igual a ele mesmo divido por 100
             result /= 100;
-
+            //atualiza os dados do operation
             this._operation = [result];
 
         }else{
-            //atualiza o _operation com o valor do result(operação dos dois números já digitados) e adiciona
-            //o último valor(operador) que estava no array, agora sobre a variavel last
-            this._operation = [result, last];
+            //atualiza o operation com o valor do result(operação dos dois números já digitados)
+            this._operation = [result];
+            //adiciona o último valor(operador) que estava no array de volta pro array
+            if (last) this._operation.push(last);
         }
 
         //mostra no display o resultado
         this.setLastNumberToDisplay();
     }
 
-    setLastNumberToDisplay(){
-        let lastNumber;
+    getLastItem(isOperator = true){
+        let lastItem;
 
         //Exemplo base do for:
         //for(i = 0; i <= 100; i++)   => i começa em 0, vai até 100, de um em um(i++)
 
+        
         //verifica qual o número está por último no array para exibilo na tela
         for (let i = this._operation.length-1; i >=0; i--){
             //se a ultima coisa a ser digitada não for um operador, atribui o valor dela em lastNumber
-            if (!this.isOperator(this._operation[i])){
-                lastNumber = this._operation[i];
+            if (this.isOperator(this._operation[i]) == isOperator){
+                lastItem = this._operation[i];
                 break;
             }
         }
+
+        if (!lastItem){
+            lastItem = (isOperator) ? this._lastOperator : this._lastNumber;
+        }
+
+        return lastItem;
+    }
+
+    setLastNumberToDisplay(){
+        let lastNumber = this.getLastItem(false);
 
         //Para que inicie sempre com 0
         if(!lastNumber) lastNumber = 0;
@@ -133,8 +175,6 @@ class CalcController{
                 //sendo o ultimo item no array for um operador e o valor(value) atual for um operador também
                 //subistituimos o que está no array pelo value, trocando assim os operadores(- por +, por exemplo)
                 this.setLastOperation(value);
-            }else if(isNaN(value)){
-                console.log('outra coisa', value);
             }else{
                 //adiciona o valor ao array
                 this.pushOperation(value);
@@ -153,7 +193,7 @@ class CalcController{
                 //retornar 99
                 let newValue = this.getLastOperation().toString() + value.toString();
                 //adiciona novo dado ao array e converte ele de string para numero
-                this.setLastOperation(parseInt(newValue));
+                this.setLastOperation(newValue);
             
                 this.setLastNumberToDisplay();
             }
@@ -163,6 +203,29 @@ class CalcController{
 
     setError(){
         this.displayCalc = "Error";
+    }
+
+    addDot(){
+
+        let lastOperation = this.getLastOperation();
+
+        /*Impedindo que sejam digitados mais que 1 ponto */
+            //verifica se o lastOperation é uma string e da um split nela(separa os elementos em array)
+            //da um indexOf pra ver se há um ponto nesse array. Caso haja, vai retornar algo igual ou maior a 0
+            //porém, nesse caso verificamos se não há, por isso esperamos que retorne -1
+            //assim colocamos somente um return para que nada seja feito, ou seja, não adicione outro ponto
+            //pois já existe um
+        if (typeof lastOperation === 'string' && lastOperation.split('').indexOf('.') > -1) return;
+
+
+        if (this.isOperator(lastOperation) || !lastOperation){
+            this.pushOperation('0.');
+        }else{
+            this.setLastOperation(lastOperation.toString() + '.');
+        }
+
+        this.setLastNumberToDisplay();
+
     }
 
     execBtn(value){
@@ -190,10 +253,10 @@ class CalcController{
                 this.addOperation('%');
                 break;
             case 'igual':
-
+                this.calc();
                 break;
             case 'ponto':
-                this.addOperation('.');
+                this.addDot('.');
                 break;
 
             case '0':
