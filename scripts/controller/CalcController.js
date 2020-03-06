@@ -185,9 +185,18 @@ class CalcController{
     }
 
     getResult(){
+
+        try{
         //transforma o array operation em string sem espaços por usar join ao inves de toString e
         //calcula seu valor por meio do aval
         return eval(this._operation.join(""));
+        
+        }catch(e){
+            //timeout para que o erro apareça depois do 0 que o outro metódo poria
+            setTimeout(()=>{
+                this.setError();
+            }, 1);
+        }
     }
 
     calc(){
@@ -440,14 +449,16 @@ class CalcController{
         return this._dateEl.innerHTML = value;
     }
 
-
-
-
     get displayCalc(){
         return this._displayCalcEl.innerHTML;
     }
 
     set displayCalc(value){
+        //para limitar a quantidade de caracteres no display
+        if (value.toString().length > 10){
+            this.setError();
+            return
+        }
         this._displayCalcEl.innerHTML = value;
     }
 
