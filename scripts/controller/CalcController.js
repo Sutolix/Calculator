@@ -4,19 +4,19 @@ class CalcController{
         //usando this. permite o uso das variaveis em outros lugares
         //this._ significa que o atributo é privado
         
-        //Pega os elementos do html e coloca nas variaveis
+        this._locale = 'en-us';
+        this._currentDate;
         this._audioOnOff = false;
         this._audio = new Audio('click.mp3');
         this._lastOperator = '';
         this._lastNumber = '';
-
-        
-        this._locale = 'en-us';
         this._operation = [];
+
+        //Pega os elementos do html e coloca nas variaveis
         this._displayCalcEl = document.querySelector("#display");
         this._dateEl = document.querySelector("#data");
         this._timeEl = document.querySelector("#hora");
-        this._currentDate;
+        //Metodos
         this.initialize();
         this.initButtonsEvents();
         this.initKeyboard();
@@ -34,7 +34,6 @@ class CalcController{
             //coloca o número no array para que possa fazer operações com ele
             this.pushOperation(text);
         })
-
     }
 
     copyToClipboard(){
@@ -93,12 +92,17 @@ class CalcController{
 
             switch (e.key) {
 
+            	//teclas de atalho
                 case 'Escape':
                     this.clearAll();
                     break;
                 case 'Backspace':
                     this.clearEntry();
                     break;
+                case 'c':
+                    if (e.ctrlKey) this.copyToClipboard();
+                    break;
+                //teclas de operadores
                 case '+':
                 case '-':
                 case '/':
@@ -114,7 +118,7 @@ class CalcController{
                 case ',':
                     this.addDot('.');
                     break;
-    
+    			//teclas de números
                 case '0':
                 case '1':
                 case '2':
@@ -127,15 +131,11 @@ class CalcController{
                 case '9':
                     this.addOperation(parseInt(e.key));
                     break;
-                    
-                case 'c':
-                    if (e.ctrlKey) this.copyToClipboard();
-                    break;
             }
         });
     }
 
-    /*Fasemos isso para facilitar a adição de multiplos eventos*/
+    /*Fazemos isso para facilitar a adição de multiplos eventos*/
     //Pegamos o element(btn), seus eventos(click e drag) e a função a ser executada
     //(presente no initButtonsEvents)
     addEventListenerAll(element, events, fn){
@@ -185,12 +185,10 @@ class CalcController{
     }
 
     getResult(){
-
         try{
-        //transforma o array operation em string sem espaços por usar join ao inves de toString e
-        //calcula seu valor por meio do aval
-        return eval(this._operation.join(""));
-        
+        	//transforma o array operation em string sem espaços por usar join ao inves de toString e
+        	//calcula seu valor por meio do aval
+        	return eval(this._operation.join(""));
         }catch(e){
             //timeout para que o erro apareça depois do 0 que o outro metódo poria
             setTimeout(()=>{
