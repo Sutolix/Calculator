@@ -1,4 +1,4 @@
-# Calculadora JavaScript
+# Calculator
 
 Calculator developed from the "Curso Completo de JavaScript" at Udemy.
 
