@@ -7,7 +7,7 @@ Calculator developed from the "Curso Completo de JavaScript" at Udemy for hcode.
 
 #### Details:
 
-- Key sound (can be activated by double-clicking the AC key. To disable it, double-click the same button again).
+- Key sound (can be activated by double-clicking the AC key. To disable it, double-click the same key again).
 - Copy the number on the display from the "Ctrl + C" command on the keyboard.
 - Paste outside numbers from the "Ctrl + V" command on the keyboard.
 - Numbers with more than 10 digits are not allowed.
